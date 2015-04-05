@@ -1,12 +1,10 @@
 package com.blizzard.test;
 
 import java.io.IOException;
+import java.io.Closeable;
 import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.ArrayList;
 
 public class Worker implements Runnable {
   private Socket socket;
@@ -16,36 +14,43 @@ public class Worker implements Runnable {
   }
 
   public void run() {
+    InputStream inputStream = null;
+    OutputStream outputStream = null;
+
     try {
-      String requestLine;
-      List<String> headerLines = new ArrayList<String>();
+      inputStream = socket.getInputStream();
+      outputStream = socket.getOutputStream();
+      HTTPResponse response = new HTTPResponse();
 
-      BufferedReader inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-      requestLine = inputReader.readLine();
-
-      String headerLine;
-      while ( !(headerLine=inputReader.readLine()).equals("") ){
-        headerLines.add(headerLine);
-      }
-
-      OutputStream outputStream = socket.getOutputStream();
-      HTTPResponse response = new HTTPResponse(socket.getOutputStream());
       try {
-        HTTPRequest request = new HTTPRequest(requestLine, headerLines, socket.getInetAddress());
-        EchoServlet echoServlet = new EchoServlet();
-        echoServlet.doGet(request, response);
-      } catch (HTTPResponseException e) {
-        response.setStatusCode(e.getStatusCode());
-        System.out.println(e.getMessage());
+        try {
+          HTTPRequest request = new HTTPRequest(inputStream, socket.getInetAddress());
+          EchoServlet echoServlet = new EchoServlet();
+          echoServlet.doGet(request, response);
+          response.send(outputStream);
+        } catch (HTTPResponseException e) {
+          System.out.println(e.getMessage());
+          HTTPResponse.sendException(outputStream, e);
+        }
+      } catch (Exception e) {
+        // For anything really unexpected, try once to send a 500 error (if the error was in sending to the socket this will of course fail)
+        HTTPResponse.sendException(outputStream, new HTTPResponseException(500, "INTERNAL SERVER ERROR", e));
       }
-
-      outputStream.close();
-      inputReader.close();
-      socket.close();
     }
     catch (IOException e) {
       System.out.println(e);
+    } finally {
+      forceClose(outputStream);
+      forceClose(inputStream);
+      forceClose(socket);
+    }
+  }
+
+  private static void forceClose(Closeable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (IOException ignored) {}
     }
   }
 }

@@ -1,17 +1,36 @@
 package com.blizzard.test;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.PrintStream;
 
 public class HTTPResponse implements SimpleServletResponse {
-  private int statusCode;
-  private String mimeType;
-  private Map<String, String> headers;
-  private java.io.OutputStream outputStream;
+  private static final Map<Integer, String> statusCodesMap;
+  static {
+    Map<Integer, String> initStatusCodesMap = new HashMap<Integer, String>();
+    initStatusCodesMap.put(200, "OK");
+    initStatusCodesMap.put(400, "Bad Request");
+    initStatusCodesMap.put(404, "Not Found");
+    initStatusCodesMap.put(500, "Internal Server Error");
+    statusCodesMap = Collections.unmodifiableMap(initStatusCodesMap);
+  }
 
-  public HTTPResponse(java.io.OutputStream outputStream) {
+  private int statusCode;
+  private Map<String, String> headers;
+  private boolean headerSet;
+  private java.io.ByteArrayOutputStream outputStream;
+
+  public HTTPResponse() {
     headers = new HashMap<String,String>();
-    this.outputStream = outputStream;
+    this.outputStream = new java.io.ByteArrayOutputStream();
+    this.headerSet = false;
+  }
+
+  private HTTPResponse(HTTPResponseException httpResponseException) {
+    this();
+    statusCode = httpResponseException.getStatusCode();
+    setMimeType("text/plain");
   }
 
   /**
@@ -39,7 +58,7 @@ public class HTTPResponse implements SimpleServletResponse {
    * @param mimeType The mime type to set
    */
   public void setMimeType(String mimeType) {
-    this.mimeType = mimeType;
+    headers.put("Content-Type", mimeType);
   }
 
   /**
@@ -49,5 +68,33 @@ public class HTTPResponse implements SimpleServletResponse {
    */
   public java.io.OutputStream getOutputStream() {
     return outputStream;
+  }
+
+  public static void sendException(java.io.OutputStream destinationStream, HTTPResponseException httpResponseException) {
+    HTTPResponse response = new HTTPResponse(httpResponseException);
+    PrintStream pstream = new PrintStream(response.getOutputStream());
+    pstream.println(httpResponseException.getMessage());
+    response.send(destinationStream);
+  }
+
+  public void send(java.io.OutputStream destinationStream) {
+    PrintStream pstream = new PrintStream(destinationStream);
+
+    pstream.println("HTTP/1.1 " + statusCode + " " + statusCodesMap.get(statusCode));
+
+    if (headers.get("Date") == null) {
+      java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
+      headers.put("Date", java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(now));
+    }
+
+    headers.put("Content-Length", Integer.toString(outputStream.size()));
+
+    for (String headerKey : headers.keySet()) {
+      pstream.println(headerKey + ": " + headers.get(headerKey));
+    }
+
+    pstream.println();
+
+    pstream.print(outputStream.toString());
   }
 }

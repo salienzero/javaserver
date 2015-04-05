@@ -2,11 +2,14 @@ package com.blizzard.test;
 
 import java.net.InetAddress;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 public class HTTPRequest implements SimpleServletRequest {
@@ -16,7 +19,11 @@ public class HTTPRequest implements SimpleServletRequest {
   private Map<String, String> params;
   private java.net.InetAddress clientAddress;
 
-  public HTTPRequest(String requestLine, List<String> headerLines, java.net.InetAddress clientAddress) throws HTTPResponseException {
+  public HTTPRequest(InputStream inputStream, java.net.InetAddress clientAddress) throws IOException, HTTPResponseException {
+    BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream));
+
+    String requestLine = inputReader.readLine();
+
     String[] requestLineParts = requestLine.split(" ");
     if (requestLineParts.length < 2) {
       throw new HTTPResponseException(400, "BAD REQUEST: Request line not formatted correctly. Example: GET /foo/bar.html");
@@ -30,7 +37,8 @@ public class HTTPRequest implements SimpleServletRequest {
 
     headers = new HashMap<String, String>();
 
-    for (String headerLine : headerLines) {
+    String headerLine;
+    while ( !(headerLine=inputReader.readLine()).equals("") ){
       int nameValueDelimiterIndex = headerLine.indexOf(":");
       if (nameValueDelimiterIndex < 0) {
         throw new HTTPResponseException(400, "BAD REQUEST: Header line not formatted correctly. Example: foo: bar");
@@ -50,6 +58,8 @@ public class HTTPRequest implements SimpleServletRequest {
         }
       }
     }
+
+    this.clientAddress = clientAddress;
   }
 
   /**
@@ -87,7 +97,7 @@ public class HTTPRequest implements SimpleServletRequest {
    * @return The header value
    */
   public String getHeader(String name) {
-    return headers.get(name);
+    return headers.get(name.toLowerCase());
   }
 
   /**
