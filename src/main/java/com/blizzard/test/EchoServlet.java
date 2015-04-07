@@ -3,9 +3,7 @@ package com.blizzard.test;
 import java.io.PrintStream;
 
 /**
- * This is the basic interface that "simple servlets" are provided,
- * providing access to the request data and an interface to control
- * the server response.
+ * This servlet just responds back with some of the request's info
  */
 public class EchoServlet implements SimpleServlet {
   public EchoServlet() {}

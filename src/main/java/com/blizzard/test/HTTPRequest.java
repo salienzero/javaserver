@@ -35,7 +35,7 @@ public class HTTPRequest implements SimpleServletRequest {
       throw new HTTPResponseException(400, "BAD REQUEST: Invalid URI. Example: GET /foo/bar.html", e);
     }
 
-    headers = new HashMap<String, String>();
+    headers = new HashMap<>();
 
     String headerLine;
     while ( !(headerLine=inputReader.readLine()).equals("") ){
@@ -46,7 +46,7 @@ public class HTTPRequest implements SimpleServletRequest {
       headers.put(headerLine.substring(0, nameValueDelimiterIndex).trim().toLowerCase(), headerLine.substring(nameValueDelimiterIndex + 1).trim());
     }
 
-    params = new HashMap<String, String>();
+    params = new HashMap<>();
     String query = uri.getRawQuery();
     if (query != null) {
       for (String queryPair : query.split("&")) {

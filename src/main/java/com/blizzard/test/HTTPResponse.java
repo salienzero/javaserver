@@ -8,7 +8,7 @@ import java.io.PrintStream;
 public class HTTPResponse implements SimpleServletResponse {
   private static final Map<Integer, String> statusCodesMap;
   static {
-    Map<Integer, String> initStatusCodesMap = new HashMap<Integer, String>();
+    Map<Integer, String> initStatusCodesMap = new HashMap<>();
     initStatusCodesMap.put(200, "OK");
     initStatusCodesMap.put(400, "Bad Request");
     initStatusCodesMap.put(404, "Not Found");
@@ -22,7 +22,7 @@ public class HTTPResponse implements SimpleServletResponse {
   private java.io.ByteArrayOutputStream outputStream;
 
   public HTTPResponse() {
-    headers = new HashMap<String,String>();
+    headers = new HashMap<>();
     this.outputStream = new java.io.ByteArrayOutputStream();
     this.headerSet = false;
   }

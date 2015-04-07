@@ -5,12 +5,15 @@ import java.io.Closeable;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.List;
 
 public class Worker implements Runnable {
   private Socket socket;
+  private List<ServletRoute> servletRoutes;
 
-  public Worker(Socket socket) {
+  public Worker(Socket socket, List<ServletRoute> servletRoutes) {
     this.socket = socket;
+    this.servletRoutes = servletRoutes;
   }
 
   public void run() {
@@ -25,9 +28,18 @@ public class Worker implements Runnable {
       try {
         try {
           HTTPRequest request = new HTTPRequest(inputStream, socket.getInetAddress());
-          EchoServlet echoServlet = new EchoServlet();
-          echoServlet.doGet(request, response);
-          response.send(outputStream);
+          SimpleServlet mappedServlet = null;
+          for (ServletRoute servletRoute : servletRoutes) {
+            if (request.getUrlPath().startsWith(servletRoute.getRoute())) {
+              mappedServlet = servletRoute.getServlet();
+            }
+          }
+          if (mappedServlet != null) {
+            mappedServlet.doGet(request, response);
+            response.send(outputStream);
+          } else {
+            HTTPResponse.sendException(outputStream, new HTTPResponseException(404, "NOT FOUND"));
+          }
         } catch (HTTPResponseException e) {
           System.out.println(e.getMessage());
           HTTPResponse.sendException(outputStream, e);
