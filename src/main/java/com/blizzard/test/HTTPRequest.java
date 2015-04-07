@@ -26,13 +26,13 @@ public class HTTPRequest implements SimpleServletRequest {
 
     String[] requestLineParts = requestLine.split(" ");
     if (requestLineParts.length < 2) {
-      throw new HTTPResponseException(400, "BAD REQUEST: Request line not formatted correctly. Example: GET /foo/bar.html");
+      throw new HTTPResponseException(400, "Bad Request: Request line not formatted correctly. Example: GET /foo/bar.html");
     }
     method = requestLineParts[0];
     try {
       uri = new URI(requestLineParts[1]);
     } catch (URISyntaxException e) {
-      throw new HTTPResponseException(400, "BAD REQUEST: Invalid URI. Example: GET /foo/bar.html", e);
+      throw new HTTPResponseException(400, "Bad Request: Invalid URI. Example: GET /foo/bar.html", e);
     }
 
     headers = new HashMap<>();
@@ -41,7 +41,7 @@ public class HTTPRequest implements SimpleServletRequest {
     while ( !(headerLine=inputReader.readLine()).equals("") ){
       int nameValueDelimiterIndex = headerLine.indexOf(":");
       if (nameValueDelimiterIndex < 0) {
-        throw new HTTPResponseException(400, "BAD REQUEST: Header line not formatted correctly. Example: foo: bar");
+        throw new HTTPResponseException(400, "Bad Request: Header line not formatted correctly. Example: foo: bar");
       }
       headers.put(headerLine.substring(0, nameValueDelimiterIndex).trim().toLowerCase(), headerLine.substring(nameValueDelimiterIndex + 1).trim());
     }
@@ -113,7 +113,7 @@ public class HTTPRequest implements SimpleServletRequest {
     try {
       return URLDecoder.decode(urlPart, "UTF8");
     } catch (UnsupportedEncodingException e) {
-      throw new HTTPResponseException(500, "INTERNAL SERVER ERROR: Unsupported encoding", e);
+      throw new HTTPResponseException(500, "Internal Server Error: Unsupported encoding", e);
     }
   }
 }

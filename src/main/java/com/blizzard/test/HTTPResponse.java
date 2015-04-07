@@ -70,14 +70,14 @@ public class HTTPResponse implements SimpleServletResponse {
     return outputStream;
   }
 
-  public static void sendException(java.io.OutputStream destinationStream, HTTPResponseException httpResponseException) {
+  public static void sendException(java.io.OutputStream destinationStream, HTTPResponseException httpResponseException) throws java.io.IOException {
     HTTPResponse response = new HTTPResponse(httpResponseException);
     PrintStream pstream = new PrintStream(response.getOutputStream());
     pstream.println(httpResponseException.getMessage());
     response.send(destinationStream);
   }
 
-  public void send(java.io.OutputStream destinationStream) {
+  public void send(java.io.OutputStream destinationStream) throws java.io.IOException {
     PrintStream pstream = new PrintStream(destinationStream);
 
     pstream.println("HTTP/1.1 " + statusCode + " " + statusCodesMap.get(statusCode));
@@ -85,6 +85,16 @@ public class HTTPResponse implements SimpleServletResponse {
     if (headers.get("Date") == null) {
       java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
       headers.put("Date", java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.format(now));
+    }
+
+    if (headers.get("Content-Type") == null) {
+      headers.put("Content-Type", "text/plain");
+    }
+
+    // Set a default body for failures with no body
+    if (statusCode != 200 && outputStream.size() == 0) {
+      PrintStream printOutputStream = new PrintStream(outputStream);
+      printOutputStream.println(statusCodesMap.get(statusCode));
     }
 
     headers.put("Content-Length", Integer.toString(outputStream.size()));
@@ -95,6 +105,6 @@ public class HTTPResponse implements SimpleServletResponse {
 
     pstream.println();
 
-    pstream.print(outputStream.toString());
+    outputStream.writeTo(pstream);
   }
 }

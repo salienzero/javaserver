@@ -38,7 +38,7 @@ public class Worker implements Runnable {
             mappedServlet.doGet(request, response);
             response.send(outputStream);
           } else {
-            HTTPResponse.sendException(outputStream, new HTTPResponseException(404, "NOT FOUND"));
+            HTTPResponse.sendException(outputStream, new HTTPResponseException(404, "Not Found"));
           }
         } catch (HTTPResponseException e) {
           System.out.println(e.getMessage());
@@ -46,7 +46,7 @@ public class Worker implements Runnable {
         }
       } catch (Exception e) {
         // For anything really unexpected, try once to send a 500 error (if the error was in sending to the socket this will of course fail)
-        HTTPResponse.sendException(outputStream, new HTTPResponseException(500, "INTERNAL SERVER ERROR", e));
+        HTTPResponse.sendException(outputStream, new HTTPResponseException(500, "Internal Server Error", e));
       }
     }
     catch (IOException e) {
