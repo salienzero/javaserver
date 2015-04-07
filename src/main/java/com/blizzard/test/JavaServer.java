@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class JavaServer {
   public static void main(String args[]) throws Exception {
     List<ServletRoute> servletRoutes = new ArrayList<>();
-    servletRoutes.add(new ServletRoute("/echo", new EchoServlet()));
-    servletRoutes.add(new ServletRoute("/files", new FileServlet()));
+    servletRoutes.add(new ServletRoute("/echo", new StatisticsServlet(new EchoServlet())));
+    servletRoutes.add(new ServletRoute("/files", new StatisticsServlet(new FileServlet())));
 
     ServerSocket serverSocket = new ServerSocket(8000);
     System.out.println("Server listening on " + serverSocket.getLocalPort());

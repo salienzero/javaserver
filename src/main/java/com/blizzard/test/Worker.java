@@ -28,15 +28,14 @@ public class Worker implements Runnable {
       try {
         try {
           HTTPRequest request = new HTTPRequest(inputStream, socket.getInetAddress());
-          SimpleServlet mappedServlet = null;
+          StatisticsServlet mappedServlet = null;
           for (ServletRoute servletRoute : servletRoutes) {
             if (request.getUrlPath().startsWith(servletRoute.getRoute())) {
               mappedServlet = servletRoute.getServlet();
             }
           }
           if (mappedServlet != null) {
-            mappedServlet.doGet(request, response);
-            response.send(outputStream);
+            mappedServlet.doGetWithStatistics(request, response, outputStream);
           } else {
             HTTPResponse.sendException(outputStream, new HTTPResponseException(404, "Not Found"));
           }

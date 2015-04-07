@@ -6,9 +6,9 @@ package com.blizzard.test;
  */
 public class ServletRoute {
   private String route;
-  private SimpleServlet servlet;
+  private StatisticsServlet servlet;
 
-  public ServletRoute(String route, SimpleServlet servlet) {
+  public ServletRoute(String route, StatisticsServlet servlet) {
     this.route = route;
     this.servlet = servlet;
   }
@@ -17,7 +17,7 @@ public class ServletRoute {
     return route;
   }
 
-  public SimpleServlet getServlet() {
+  public StatisticsServlet getServlet() {
     return servlet;
   }
 }
