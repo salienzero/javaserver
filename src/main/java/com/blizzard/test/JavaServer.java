@@ -18,6 +18,5 @@ public class JavaServer {
       System.out.println("Connected");
       new Thread(new Worker(socket, servletRoutes)).start();
     }
-    System.out.println("Shutting down");
   }
 }
