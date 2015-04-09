@@ -45,6 +45,8 @@ public class Worker implements Runnable {
         }
       } catch (Exception e) {
         // For anything really unexpected, try once to send a 500 error (if the error was in sending to the socket this will of course fail)
+        System.out.println(e);
+        e.printStackTrace(new java.io.PrintStream(System.out));
         HTTPResponse.sendException(outputStream, new HTTPResponseException(500, "Internal Server Error", e));
       }
     }
