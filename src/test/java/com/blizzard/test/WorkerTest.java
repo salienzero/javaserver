@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

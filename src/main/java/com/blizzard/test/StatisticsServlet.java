@@ -33,20 +33,20 @@ public class StatisticsServlet {
     }
   }
 
-  public synchronized int incrementActiveRequests() {
+  private synchronized int incrementActiveRequests() {
     return activeRequests++;
   }
 
-  public synchronized int decrementActiveRequests() {
+  private synchronized int decrementActiveRequests() {
     return activeRequests--;
   }
 
-  public synchronized void updateStatistics(long start, long finish) {
+  private synchronized void updateStatistics(long start, long finish) {
     averageResponseTime = ((averageResponseTime * totalRequests) + (finish-start))/(totalRequests + 1);
     totalRequests++;
   }
 
-  public synchronized void printStatistics() {
+  private synchronized void printStatistics() {
     System.out.println("Statistics for: " + servlet.getClass());
     System.out.println("Active requests: " + activeRequests);
     System.out.println("Total requests: " + totalRequests);
@@ -55,5 +55,17 @@ public class StatisticsServlet {
 
   public SimpleServlet getServlet() {
     return servlet;
+  }
+
+  public synchronized int getActiveRequests() {
+    return activeRequests;
+  }
+
+  public synchronized int getTotalRequests() {
+    return totalRequests;
+  }
+
+  public synchronized long getAverageResponseTime() {
+    return averageResponseTime;
   }
 }
