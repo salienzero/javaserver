@@ -59,6 +59,24 @@ public class HTTPRequestTest {
   }
 
   @Test
+  public void constructorThrows400OnEmptyRequest() throws IOException {
+    String httpGetRequest = "";
+
+    inputStream = new ByteArrayInputStream(httpGetRequest.getBytes());
+
+    boolean expectedExceptionThrown = false;
+
+    try {
+      request = new HTTPRequest(inputStream, inetAddress);
+    } catch (HTTPResponseException e) {
+      assertEquals(400, e.getStatusCode());
+      expectedExceptionThrown = true;
+    }
+
+    assertTrue(expectedExceptionThrown);
+  }
+
+  @Test
   public void constructorThrows400OnBadURL(@Mocked java.net.URI uri) throws IOException, java.net.URISyntaxException {
     String httpGetRequest = "GET BADURI\n" +
       "User-Agent: curl\n" +

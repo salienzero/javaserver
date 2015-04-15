@@ -23,6 +23,9 @@ public class HTTPRequest implements SimpleServletRequest {
     BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream));
 
     String requestLine = inputReader.readLine();
+    if (requestLine == null) {
+      throw new HTTPResponseException(400, "Bad Request: Request line required. Example: GET /foo/bar.html");
+    }
 
     String[] requestLineParts = requestLine.split(" ");
     if (requestLineParts.length < 2) {
